@@ -1,4 +1,4 @@
-function upload() {
+export default function Upload() {
   return (
     <div className="px-4 py-16">
       <div>
@@ -55,5 +55,3 @@ function upload() {
     </div>
   );
 }
-
-export default upload;
