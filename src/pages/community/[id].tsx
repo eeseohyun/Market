@@ -1,4 +1,6 @@
+import Button from '../../../components/button';
 import Layout from '../../../components/layout';
+import TextArea from '../../../components/textArea';
 
 export default function CommunityPostDetail() {
   return (
@@ -85,15 +87,13 @@ export default function CommunityPostDetail() {
             </div>
           </div>
         </div>
-        <div>
-          <textarea
-            className="mt-1 shadow-sm w-full focus:ring-orange-500 rounded-md border-gray-300 focus:border-orange-500"
-            rows={4}
+        <div className="px-4">
+          <TextArea
+            name="description"
             placeholder="답변을 남겨주세요."
+            required
           />
-          <button className="bg-orange-400 mt-5 w-full hover:bg-orange-500 text-white py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium focus:ring-2 focus:ring-offset-2 focus:ring-orange-400">
-            완료
-          </button>
+          <Button text="완료" />
         </div>
       </div>
     </Layout>

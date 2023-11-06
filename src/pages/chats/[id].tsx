@@ -1,28 +1,15 @@
 import Layout from '../../../components/layout';
+import Message from '../../../components/message';
 
 export default function ChatDetail() {
   return (
     <Layout canGoBack>
       <div className="py-16 px-4 space-y-4">
-        <div className="flex items-start space-x-2">
-          <div className="w-8  h-8 rounded-full bg-slate-200" />
-          <div className="w-1/2 text-sm text-gray-700 p-2 rounded-md border border-gray-200">
-            <p>Hi how much are you selling them for?</p>
-          </div>
-        </div>
-        <div className="flex flex-row-reverse space-x-2 space-x-reverse">
-          <div />
-          <div className="w-1/2 text-sm text-gray-700 p-2 rounded-md border border-gray-200">
-            <p>I want ￦20,000</p>
-          </div>
-        </div>
-        <div className="flex items-start space-x-2">
-          <div className="w-8 h-8 rounded-full bg-slate-200" />
-          <div className="w-1/2 text-sm text-gray-700 p-2 rounded-md border border-gray-200">
-            <p>미쳤어?</p>
-          </div>
-        </div>
-        <div className="fixed w-full mx-auto max-w-md bottom-2 left-0 inset-x-0">
+        <Message message="Hi how much are you selling them for?" />
+        <Message message="I want ￦20,000" reversed />
+        <Message message="미쳤어?" />
+
+        <form className="fixed w-full mx-auto max-w-md bottom-2 left-0 inset-x-0">
           <div className="flex relative items-center">
             <input
               type="text"
@@ -34,7 +21,7 @@ export default function ChatDetail() {
               </button>
             </div>
           </div>
-        </div>
+        </form>
       </div>
     </Layout>
   );

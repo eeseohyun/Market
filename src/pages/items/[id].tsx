@@ -1,3 +1,4 @@
+import Button from '../../../components/button';
 import Layout from '../../../components/layout';
 
 export default function ItemDetail() {
@@ -29,9 +30,7 @@ export default function ItemDetail() {
               the first motherfucker to get shot. You understand?
             </p>
             <div className="flex items-center justify-between space-x-2">
-              <button className="flex-1 bg-orange-500 text-white py-3 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 hover:bg-orange-600 font-medium">
-                채팅하기
-              </button>
+              <Button text="채팅하기" large />
               <button className="p-3 flex items-center justify-center text-gray-400 rounded-md hover:bg-gray-100 hover:text-gray-500 focus:outline-none">
                 <svg
                   className="h-6 w-6 "
