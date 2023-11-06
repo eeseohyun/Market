@@ -1,6 +1,6 @@
 export default function Upload() {
   return (
-    <div className="px-4 py-16">
+    <div className="px-4 py-10 space-y-5">
       <div>
         <label className="w-full cursor-pointer flex items-center justify-center border-2 border-dashed border-gray-300 h-48 rounded-md text-gray-500 hover:text-gray-600 hover:border-gray-600">
           <svg
@@ -21,7 +21,23 @@ export default function Upload() {
           <input className="hidden" type="file" />
         </label>
       </div>
-      <div className="my-5">
+      <div>
+        <label
+          className="mb-1 block text-sm font-medium text-gray-700"
+          htmlFor="name"
+        >
+          상품명
+        </label>
+        <div className="rounded-md relative flex  items-center shadow-sm">
+          <input
+            id="name"
+            type="text"
+            className="appearance-none w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-orange-500 focus:border-orange-500"
+            required
+          />
+        </div>
+      </div>
+      <div>
         <label
           className="mb-1 block text-sm font-medium text-gray-700"
           htmlFor="price"
