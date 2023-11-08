@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { cls } from '../libs/utils';
+import { cls } from '../libs/client/utils';
 import React from 'react';
 import { useRouter } from 'next/router';
 
