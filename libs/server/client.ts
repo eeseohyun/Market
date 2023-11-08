@@ -1,8 +1,8 @@
 import { PrismaClient } from '@prisma/client';
 
-export const prisma = new PrismaClient();
+export const client = new PrismaClient();
 
-prisma.user.create({
+client.user.create({
   data: {
     email: 'abcd@naver.com',
     name: 'abcd',
