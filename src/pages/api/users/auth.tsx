@@ -1,25 +1,46 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { client } from '../../../../libs/server/client';
-import withHandler from '../../../../libs/server/withHandler';
+import withHandler, { ResponseType } from '../../../../libs/server/withHandler';
+import Twilio from 'twilio';
 
-async function handler(req: NextApiRequest, res: NextApiResponse) {
+const twilio = Twilio(process.env.TWILIO_SID, process.env.TWILIO_TOKEN);
+
+async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse<ResponseType>
+) {
   const { phone, email } = req.body;
-  const payload = phone ? { phone: +phone } : { email };
-
-  const user = await client.user.upsert({
-    where: {
-      ...payload,
+  const user = phone ? { phone: +phone } : email ? { email } : null;
+  if (!user) return res.status(400).json({ ok: false });
+  const randomNum = String(Math.random()).substring(2, 8);
+  const token = await client.token.create({
+    data: {
+      token: randomNum,
+      user: {
+        connectOrCreate: {
+          where: {
+            ...user,
+          },
+          create: {
+            name: '유저',
+            ...user,
+          },
+        },
+      },
     },
-    create: {
-      name: '유저',
-      ...payload,
-    },
-    update: {},
-  }); //create, update, where
+  });
+  if (phone) {
+    await twilio.messages.create({
+      messagingServiceSid: process.env.TWILIO_MSID,
+      to: process.env.MY_PHONE!,
+      body: `인증 코드 : ${randomNum}`,
+      from: process.env.FROM_PHONE,
+    });
+  }
 
-  console.log(user);
-  console.log(req.body);
-  return res.status(200).end();
+  return res.json({
+    ok: true,
+  });
 }
 
 export default withHandler('POST', handler);
