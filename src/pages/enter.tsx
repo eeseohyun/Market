@@ -1,15 +1,40 @@
 import { useState } from 'react';
-import { cls } from '../../libs/utils';
+import { cls } from '../../libs/client/utils';
 import Button from '../../components/button';
 import Input from '../../components/input';
+import { useForm } from 'react-hook-form';
+import useMutation from '../../libs/client/useMutation';
+
+interface EnterProps {
+  email?: string;
+  phone?: number;
+}
 
 export default function Enter() {
+  const [auth, { loading, data, error }] = useMutation('/api/users/auth');
   const [method, setMethod] = useState<'email' | 'phone'>('email');
+  const {
+    register,
+    reset,
+    handleSubmit,
+    formState: { errors },
+    setError, //서버 측 에러
+  } = useForm<EnterProps>({
+    mode: 'onBlur',
+  });
+  //register : input을 state와 연결 시켜줌
+  const onValid = (validForm: EnterProps) => {
+    auth(validForm);
+  };
+
+  console.log(loading, data, error);
 
   const onEmailClick = () => {
+    reset();
     setMethod('email');
   };
   const onPhoneClick = () => {
+    reset();
     setMethod('phone');
   };
   return (
@@ -45,16 +70,51 @@ export default function Enter() {
           </div>
         </div>
 
-        <form className="flex flex-col mt-8 space-y-6">
+        <form
+          className="flex flex-col mt-8 space-y-6"
+          onSubmit={handleSubmit(onValid)}
+        >
           <div className="mt-1">
             {method === 'email' ? (
-              <Input label="Email address" kind="email" name="email" required />
+              <>
+                <Input
+                  label="Email address"
+                  kind="email"
+                  name="email"
+                  type="email"
+                  register={register('email', {
+                    pattern: {
+                      value:
+                        /^[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*.[a-zA-Z]{2,3}$/i,
+                      message: '이메일 형식이 아닙니다.',
+                    },
+                    required: '이메일은 필수 입력입니다.',
+                  })}
+                />
+                {errors.email?.message}
+              </>
             ) : null}
+
             {method === 'phone' ? (
-              <Input label="Phone number" kind="phone" name="phone" required />
+              <>
+                <Input
+                  label="Phone number"
+                  kind="phone"
+                  name="phone"
+                  type="number"
+                  register={register('phone', {
+                    required: '휴대폰 번호는 필수 입력입니다.',
+                    pattern: {
+                      value: /^01[0-1, 7][0-9]{7,8}$/,
+                      message: '숫자만 입력해주세요.',
+                    },
+                  })}
+                />
+                {errors.phone?.message}
+              </>
             ) : null}
           </div>
-          <Button text="인증하기" />
+          <Button text={loading ? 'loading' : '인증하기'} />
         </form>
         <div className="mt-6">
           <div className="relative">
