@@ -19,7 +19,8 @@ model User{
   avatar    String?
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
-  tokens     Token[]
+  tokens    Token[]
+  items     Items[]
 }
 
 model Token{
@@ -30,4 +31,18 @@ model Token{
   updatedAt  DateTime  @updatedAt
   userId     Int
   @@index([userId])
+}
+
+
+model Items{
+  id           Int       @id @default(autoincrement())
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  user         User      @relation(fields:[userId], references: [id], onDelete: Cascade)
+  userId       Int
+  @@index([userId])
+  image        String
+  name         String
+  price        Int
+  description  String    @db.MediumText
 }
