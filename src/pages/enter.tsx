@@ -1,17 +1,30 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { cls } from '../../libs/client/utils';
 import Button from '../../components/button';
 import Input from '../../components/input';
 import { useForm } from 'react-hook-form';
 import useMutation from '../../libs/client/useMutation';
+import { useRouter } from 'next/router';
 
 interface EnterProps {
   email?: string;
   phone?: number;
 }
+interface TokenProps {
+  token: string;
+}
+
+interface MutationResult {
+  ok: boolean;
+}
 
 export default function Enter() {
-  const [auth, { loading, data, error }] = useMutation('/api/users/auth');
+  const [auth, { loading, data, error }] =
+    useMutation<MutationResult>('/api/users/auth');
+  const [
+    confirmToken,
+    { loading: tokenLoading, data: tokenData, error: tokenError },
+  ] = useMutation<MutationResult>('/api/users/confirm');
   const [method, setMethod] = useState<'email' | 'phone'>('email');
   const {
     register,
@@ -22,12 +35,22 @@ export default function Enter() {
   } = useForm<EnterProps>({
     mode: 'onBlur',
   });
+  const { register: tokenRegister, handleSubmit: tokenHandleSubmit } =
+    useForm<TokenProps>();
   //register : input을 state와 연결 시켜줌
   const onValid = (validForm: EnterProps) => {
     auth(validForm);
   };
-
-  console.log(loading, data, error);
+  const onTokenValid = (validForm: TokenProps) => {
+    if (tokenLoading) return;
+    confirmToken(validForm);
+  };
+  const router = useRouter();
+  useEffect(() => {
+    if (tokenData?.ok) {
+      router.push('/');
+    }
+  }, [tokenData, router]);
 
   const onEmailClick = () => {
     reset();
@@ -43,79 +66,105 @@ export default function Enter() {
         Welcome to Our Market 🛍️
       </h3>
       <div className="mt-10">
-        <div className="flex flex-col items-center">
-          <div className="grid grid-cols-2 w-full border-b gap-10 mt-10">
-            <button
-              className={cls(
-                'pb-4 font-medium border-b-2',
-                method === 'email'
-                  ? 'text-orange-400  border-orange-500'
-                  : 'border-transparent text-gray-500'
-              )}
-              onClick={onEmailClick}
+        {data?.ok ? (
+          <>
+            <form
+              className="flex flex-col mt-8 space-y-6"
+              onSubmit={tokenHandleSubmit(onTokenValid)}
             >
-              Email address
-            </button>
-            <button
-              className={cls(
-                'pb-4 font-medium border-b-2',
-                method === 'phone'
-                  ? 'text-orange-400  border-orange-500'
-                  : 'border-transparent text-gray-500'
-              )}
-              onClick={onPhoneClick}
+              <div className="mt-1">
+                <div>
+                  <Input
+                    label="Confirmation Token"
+                    name="token"
+                    type="number"
+                    register={tokenRegister('token', {
+                      required: '인증 토큰을 입력해주세요',
+                    })}
+                  />
+                </div>
+              </div>
+              <Button text={loading ? 'loading' : '인증하기'} />
+            </form>
+          </>
+        ) : (
+          <>
+            <div className="flex flex-col items-center">
+              <div className="grid grid-cols-2 w-full border-b gap-10 mt-10">
+                <button
+                  className={cls(
+                    'pb-4 font-medium border-b-2',
+                    method === 'email'
+                      ? 'text-orange-400  border-orange-500'
+                      : 'border-transparent text-gray-500'
+                  )}
+                  onClick={onEmailClick}
+                >
+                  Email address
+                </button>
+                <button
+                  className={cls(
+                    'pb-4 font-medium border-b-2',
+                    method === 'phone'
+                      ? 'text-orange-400  border-orange-500'
+                      : 'border-transparent text-gray-500'
+                  )}
+                  onClick={onPhoneClick}
+                >
+                  Phone number
+                </button>
+              </div>
+            </div>
+
+            <form
+              className="flex flex-col mt-8 space-y-6"
+              onSubmit={handleSubmit(onValid)}
             >
-              Phone number
-            </button>
-          </div>
-        </div>
+              <div className="mt-1">
+                {method === 'email' ? (
+                  <>
+                    <Input
+                      label="Email address"
+                      kind="email"
+                      name="email"
+                      type="email"
+                      register={register('email', {
+                        pattern: {
+                          value:
+                            /^[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*.[a-zA-Z]{2,3}$/i,
+                          message: '이메일 형식이 아닙니다.',
+                        },
+                        required: '이메일은 필수 입력입니다.',
+                      })}
+                    />
+                    {errors.email?.message}
+                  </>
+                ) : null}
 
-        <form
-          className="flex flex-col mt-8 space-y-6"
-          onSubmit={handleSubmit(onValid)}
-        >
-          <div className="mt-1">
-            {method === 'email' ? (
-              <>
-                <Input
-                  label="Email address"
-                  kind="email"
-                  name="email"
-                  type="email"
-                  register={register('email', {
-                    pattern: {
-                      value:
-                        /^[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*.[a-zA-Z]{2,3}$/i,
-                      message: '이메일 형식이 아닙니다.',
-                    },
-                    required: '이메일은 필수 입력입니다.',
-                  })}
-                />
-                {errors.email?.message}
-              </>
-            ) : null}
+                {method === 'phone' ? (
+                  <>
+                    <Input
+                      label="Phone number"
+                      kind="phone"
+                      name="phone"
+                      type="number"
+                      register={register('phone', {
+                        required: '휴대폰 번호는 필수 입력입니다.',
+                        pattern: {
+                          value: /^01[0-1, 7][0-9]{7,8}$/,
+                          message: '숫자만 입력해주세요.',
+                        },
+                      })}
+                    />
+                    {errors.phone?.message}
+                  </>
+                ) : null}
+              </div>
+              <Button text={loading ? 'loading' : '인증 요청'} />
+            </form>
+          </>
+        )}
 
-            {method === 'phone' ? (
-              <>
-                <Input
-                  label="Phone number"
-                  kind="phone"
-                  name="phone"
-                  type="number"
-                  register={register('phone', {
-                    required: '휴대폰 번호는 필수 입력입니다.',
-                    pattern: {
-                      value: /^01[0-1, 7][0-9]{7,8}$/,
-                      message: '숫자만 입력해주세요.',
-                    },
-                  })}
-                />
-                {errors.phone?.message}
-              </>
-            ) : null}
-          </div>
-          <Button text={loading ? 'loading' : '인증하기'} />
-        </form>
         <div className="mt-6">
           <div className="relative">
             <div className="absolute w-full border-t border-gray-300"></div>
