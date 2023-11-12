@@ -1,7 +1,25 @@
+import { useRouter } from 'next/router';
 import Button from '../../../components/button';
 import Layout from '../../../components/layout';
+import useSWR from 'swr';
+import Link from 'next/link';
+import { Items, User } from '@prisma/client';
+
+interface ItemWithUser extends Items {
+  user: User;
+}
+interface ItemDetailProps {
+  ok: boolean;
+  item: ItemWithUser;
+  relatedItems: Items[];
+}
 
 export default function ItemDetail() {
+  const router = useRouter();
+  const { data } = useSWR<ItemDetailProps>(
+    router.query.id ? `/api/items/${router.query.id}` : null
+  );
+
   return (
     <Layout title="상품 상세" canGoBack>
       <div className="px-4 py-16">
@@ -10,24 +28,26 @@ export default function ItemDetail() {
           <div className="flex py-3 border-t border-b items-center space-x-3">
             <div className="w-12 h-12 rounded-full bg-slate-300" />
             <div>
-              <p className="text-sm font-medium text-gray-700">Steve Jobs</p>
-              <p className="text-xs font-medium text-gray-400 cursor-pointer">
-                View Profile &rarr;
+              <p className="text-sm font-medium text-gray-700">
+                {data?.item?.user?.name}
               </p>
+              <Link
+                href={`/users/profiles/${data?.item?.user.id}`}
+                className="text-xs font-medium text-gray-400 cursor-pointer"
+              >
+                View Profile &rarr;
+              </Link>
             </div>
           </div>
           <div className="mt-8 mb-8">
-            <h1 className="text-3xl font-bold text-gray-900">Galaxy S23</h1>
-            <span className="text-3xl block mt-2 text-gray-900">$699</span>
+            <h1 className="text-3xl font-bold text-gray-900">
+              {data?.item?.name}
+            </h1>
+            <span className="text-3xl block mt-2 text-gray-900">
+              {data?.item?.price}
+            </span>
             <p className="text-base my-6 text-gray-700">
-              My money&apos;s in that office, right? If she start giving me some
-              bullshit about it ain&apos;t there, and we got to go someplace
-              else and get it, I&apos;m gonna shoot you in the head then and
-              there. Then I&apos;m gonna shoot that bitch in the kneecaps, find
-              out where my goddamn money is. She gonna tell me too. Hey, look at
-              me when I&apos;m talking to you, motherfucker. You listen: we go
-              in there, and that ni**a Winston or anybody else is in there, you
-              the first motherfucker to get shot. You understand?
+              {data?.item?.description}
             </p>
             <div className="flex items-center justify-between space-x-2">
               <Button text="채팅하기" large />
@@ -54,11 +74,14 @@ export default function ItemDetail() {
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Similar items</h2>
           <div className="mt-5 grid grid-cols-2 gap-4">
-            {[1, 2, 3, 4, 5, 6].map((_, i) => (
-              <div key={i} className="">
+            {data?.relatedItems.map((item) => (
+              <div key={item.id} className="">
                 <div className="w-full h-56 bg-slate-300 mb-3" />
-                <h3 className="text-gray-700 -mb-0.5">Iphone 14 Pro</h3>
-                <span className="text-sm font-medium text-gray-900">$899</span>
+                <Link href={`/items/${item.id}`}></Link>
+                <h3 className="text-gray-700 -mb-0.5">{item.name}</h3>
+                <span className="text-sm font-medium text-gray-900">
+                  {item.price}
+                </span>
               </div>
             ))}
           </div>
