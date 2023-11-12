@@ -1,12 +1,42 @@
+import { useForm } from 'react-hook-form';
 import Button from '../../../components/button';
 import Input from '../../../components/input';
 import Layout from '../../../components/layout';
 import TextArea from '../../../components/textArea';
+import useMutation from '../../../libs/client/useMutation';
+import { useEffect } from 'react';
+import { useRouter } from 'next/router';
+import { Items } from '@prisma/client';
+
+interface UploadProps {
+  name: string;
+  price: number;
+  description: string;
+}
+
+interface UploadMutation {
+  ok: boolean;
+  item: Items;
+}
 
 export default function Upload() {
+  const router = useRouter();
+  const { register, handleSubmit } = useForm<UploadProps>();
+  const [uploadItem, { loading, data }] =
+    useMutation<UploadMutation>('/api/items');
+  const onValid = (data: UploadProps) => {
+    if (loading) return;
+    uploadItem(data);
+  };
+
+  useEffect(() => {
+    if (data?.ok) {
+      router.push(`/items/${data.item.id}`);
+    }
+  }, [data, router]);
   return (
     <Layout title="상품 업로드" canGoBack>
-      <div className="px-4 py-16 space-y-5">
+      <form className="px-4 py-16 space-y-5" onSubmit={handleSubmit(onValid)}>
         <div>
           <label className="w-full cursor-pointer flex items-center justify-center border-2 border-dashed border-gray-300 h-48 rounded-md text-gray-500 hover:text-gray-600 hover:border-gray-600">
             <svg
@@ -27,19 +57,33 @@ export default function Upload() {
             <input className="hidden" type="file" />
           </label>
         </div>
-        <Input label="상품명" name="name" kind="text" required />
-
         <Input
+          register={register('name', {
+            required: true,
+          })}
+          label="상품명"
+          name="name"
+          kind="text"
+          type="text"
+        />
+        <Input
+          register={register('price', {
+            required: true,
+          })}
           label="가격"
           name="price"
           kind="price"
-          required
-          placeholder="0"
+          type="number"
         />
-        <TextArea name="description" label="설명" />
-
-        <Button text="업로드" />
-      </div>
+        <TextArea
+          register={register('description', {
+            required: true,
+          })}
+          name="description"
+          label="설명"
+        />
+        <Button text={loading ? 'loading' : '업로드'} />
+      </form>
     </Layout>
   );
 }
