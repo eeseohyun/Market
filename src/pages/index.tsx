@@ -3,19 +3,30 @@ import { Inter } from 'next/font/google';
 import Layout from '../../components/layout';
 import FloatButton from '../../components/floatButton';
 import Item from '../../components/item';
+import useUser from '../../libs/client/useUser';
+import useSWR from 'swr';
+import { Items } from '@prisma/client';
 
 const inter = Inter({ subsets: ['latin'] });
 
+interface ItemsResponse {
+  ok: boolean;
+  items: Items[];
+}
+
 export default function Home() {
+  const { user, isLoading } = useUser();
+  const { data } = useSWR<ItemsResponse>('/api/items');
+  console.log(data);
   return (
     <Layout title="홈" hasTabBar>
       <div className="flex flex-col space-y-2 py-14 divide-y-[1px]">
-        {[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1].map((_, i) => (
+        {data?.items.map((item) => (
           <Item
-            id={i}
-            key={i}
-            title="Iphone 15"
-            price={999}
+            id={item.id}
+            key={item.id}
+            title={item.name}
+            price={item.price}
             comments={1}
             hearts={1}
           />
