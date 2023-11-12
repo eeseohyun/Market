@@ -5,19 +5,21 @@ export interface ResponseType {
   [key: string]: any;
 }
 
+type method = 'GET' | 'POST' | 'DELETE';
+
 interface ConfigProps {
-  method: 'GET' | 'POST' | 'DELETE';
+  methods: method[];
   fn: (req: NextApiRequest, res: NextApiResponse) => void;
   isLogin?: boolean; //default: false
 }
 
 export default function withHandler({
-  method,
+  methods,
   fn,
   isLogin = true,
 }: ConfigProps) {
   return async function (req: NextApiRequest, res: NextApiResponse) {
-    if (req.method !== method) {
+    if (req.method && !methods.includes(req.method as any)) {
       return res.status(405).end();
     }
     if (isLogin && !req.session.user) {
