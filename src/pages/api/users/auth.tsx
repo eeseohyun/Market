@@ -66,4 +66,4 @@ async function handler(
   });
 }
 
-export default withHandler({ method: 'POST', fn: handler, isLogin: false });
+export default withHandler({ methods: ['POST'], fn: handler, isLogin: false });
