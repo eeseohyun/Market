@@ -1,5 +1,3 @@
-import Image from 'next/image';
-import { Inter } from 'next/font/google';
 import Layout from '../../components/layout';
 import FloatButton from '../../components/floatButton';
 import Item from '../../components/item';
@@ -7,8 +5,11 @@ import useUser from '../../libs/client/useUser';
 import useSWR from 'swr';
 import { Items } from '@prisma/client';
 
-const inter = Inter({ subsets: ['latin'] });
-
+export interface ItemWithCount extends Items {
+  _count: {
+    favorite: number;
+  };
+}
 interface ItemsResponse {
   ok: boolean;
   items: Items[];
@@ -28,7 +29,7 @@ export default function Home() {
             title={item.name}
             price={item.price}
             comments={1}
-            hearts={1}
+            hearts={item._count?.favorite || 0}
           />
         ))}
         <FloatButton href="/items/upload">
