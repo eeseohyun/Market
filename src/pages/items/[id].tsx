@@ -4,6 +4,8 @@ import Layout from '../../../components/layout';
 import useSWR from 'swr';
 import Link from 'next/link';
 import { Items, User } from '@prisma/client';
+import useMutation from '../../../libs/client/useMutation';
+import useUser from '../../../libs/client/useUser';
 
 interface ItemWithUser extends Items {
   user: User;
@@ -12,13 +14,25 @@ interface ItemDetailProps {
   ok: boolean;
   item: ItemWithUser;
   relatedItems: Items[];
+  isLiked: boolean;
 }
 
 export default function ItemDetail() {
+  const { user, isLoading } = useUser();
   const router = useRouter();
-  const { data } = useSWR<ItemDetailProps>(
+  const { data, mutate: boundMutate } = useSWR<ItemDetailProps>(
     router.query.id ? `/api/items/${router.query.id}` : null
   );
+  const [toggleFavorite] = useMutation(
+    `/api/items/${router.query.id}/favorite`
+  );
+  const onClick = () => {
+    toggleFavorite({});
+    //Optimistic UI Update => API를 기다릴 필요 없이 아주 빠른 반응형 UI 가능
+    if (!data) return;
+    boundMutate((prev) => prev && { ...prev, isLiked: !prev.isLiked }, false); //첫번재 인자는 업데이트할 캐쉬 데이터, 두번째 인자는 캐시 업데이트 이후 백엔드 요청을 통해 검증(default:true)
+    //즉, only 캐시 데이터만 변경
+  };
 
   return (
     <Layout title="상품 상세" canGoBack>
@@ -32,7 +46,7 @@ export default function ItemDetail() {
                 {data?.item?.user?.name}
               </p>
               <Link
-                href={`/users/profiles/${data?.item?.user.id}`}
+                href={`/users/profiles/${data?.item?.user?.id}`}
                 className="text-xs font-medium text-gray-400 cursor-pointer"
               >
                 View Profile &rarr;
@@ -51,11 +65,19 @@ export default function ItemDetail() {
             </p>
             <div className="flex items-center justify-between space-x-2">
               <Button text="채팅하기" large />
-              <button className="p-3 flex items-center justify-center text-gray-400 rounded-md hover:bg-gray-100 hover:text-gray-500 focus:outline-none">
+              <button
+                onClick={onClick}
+                className={`p-3 flex items-center justify-center hover:bg-gray-100 rounded-md focus:outline-none
+                  ${
+                    data?.isLiked
+                      ? 'text-red-400  hover:text-red-500'
+                      : 'text-gray-400  hover:text-gray-500'
+                  }`}
+              >
                 <svg
                   className="h-6 w-6 "
                   xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
+                  fill={data?.isLiked ? 'currentColor' : 'none'}
                   viewBox="0 0 24 24"
                   stroke="currentColor"
                   aria-hidden="true"
