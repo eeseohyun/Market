@@ -1,5 +1,3 @@
-import { cls } from '../libs/client/utils';
-
 interface ButtonProps {
   large?: boolean;
   text: string;
@@ -15,10 +13,8 @@ export default function Button({
   return (
     <button
       {...rest}
-      className={cls(
-        'w-full bg-orange-400 hover:bg-orange-500 text-white px-4 border border-transparent rounded-md shadow-sm font-medium focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 focus:outline-none',
-        large ? 'py-3 text-base' : 'py-2 text-sm '
-      )}
+      className={`w-full bg-orange-400 hover:bg-orange-500 text-white px-4 border border-transparent rounded-md shadow-sm font-medium focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 focus:outline-none
+        ${large ? 'py-3 text-base' : 'py-2 text-sm'}`}
     >
       {text}
     </button>
