@@ -7,11 +7,11 @@ async function handler(
   req: NextApiRequest,
   res: NextApiResponse<ResponseType>
 ) {
-  const {
-    body: { question, latitude, longitude },
-    session: { user },
-  } = req;
   if (req.method === 'POST') {
+    const {
+      body: { question, latitude, longitude },
+      session: { user },
+    } = req;
     const post = await client.post.create({
       data: {
         question,
@@ -27,6 +27,11 @@ async function handler(
     res.json({ ok: true, post });
   }
   if (req.method === 'GET') {
+    const {
+      query: { latitude, longitude },
+    } = req;
+    const latitudeNum = parseFloat(latitude + '');
+    const longitudeNum = parseFloat(longitude + '');
     const posts = await client.post.findMany({
       include: {
         user: {
@@ -41,6 +46,16 @@ async function handler(
             wonder: true,
             answers: true,
           },
+        },
+      },
+      where: {
+        latitude: {
+          gte: latitudeNum - 0.01, //크거나 같음 유저가 변경하게끔 수정
+          lte: latitudeNum + 0.01, //작거나 같음
+        },
+        longitude: {
+          gte: longitudeNum - 0.01,
+          lte: longitudeNum + 0.01,
         },
       },
     });
