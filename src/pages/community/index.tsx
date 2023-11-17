@@ -3,6 +3,7 @@ import FloatButton from '../../../components/floatButton';
 import Layout from '../../../components/layout';
 import useSWR from 'swr';
 import Link from 'next/link';
+import useCoords from '../../../libs/client/useCoords';
 
 interface PostsWithUser extends Post {
   user: User;
@@ -16,7 +17,12 @@ interface PostsResponse {
   posts: PostsWithUser[];
 }
 export default function Community() {
-  const { data } = useSWR<PostsResponse>(`/api/posts`);
+  const { latitude, longitude } = useCoords();
+  const { data } = useSWR<PostsResponse>(
+    latitude && longitude
+      ? `/api/posts?latitude=${latitude}&longitude=${longitude}`
+      : null
+  );
   console.log(data);
   return (
     <Layout title="동네생활" hasTabBar>
