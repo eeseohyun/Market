@@ -1,11 +1,60 @@
+import { useForm } from 'react-hook-form';
 import Button from '../../../components/button';
 import Input from '../../../components/input';
 import Layout from '../../../components/layout';
+import useUser from '../../../libs/client/useUser';
+import { useEffect } from 'react';
+import useMutation from '../../../libs/client/useMutation';
+
+interface EditProfileProps {
+  email?: string;
+  phone?: string;
+  name?: string;
+  formErrors?: string;
+}
+
+interface EditProfileResponse {
+  ok: boolean;
+  error?: string;
+}
 
 export default function EditProfile() {
+  const { user } = useUser();
+  const [editProfile, { data, loading }] =
+    useMutation<EditProfileResponse>(`/api/users/user`);
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    setError,
+    formState: { errors },
+  } = useForm();
+  useEffect(() => {
+    if (user?.email) setValue('email', user.email);
+    if (user?.phone) setValue('phone', user.phone);
+    if (user?.name) setValue('name', user.name);
+  }, [user, setValue]);
+  const onValid = ({ email, phone, name }: EditProfileProps) => {
+    if (loading) return;
+    if (email === '' && phone === '' && name === '') {
+      setError('formErrors', {
+        message: '이메일 또는 휴대폰 번호를 입력해주세요.',
+      });
+    }
+    editProfile({
+      email,
+      phone,
+      name,
+    });
+  };
+  useEffect(() => {
+    if (data && !data.ok && data.error) {
+      setError('formErrors', { message: data.error });
+    }
+  }, [data, setError]);
   return (
     <Layout title="프로필 수정" canGoBack>
-      <form className="py-16 px-4 space-y-4">
+      <form onSubmit={handleSubmit(onValid)} className="py-16 px-4 space-y-4">
         <div className="flex flex-col justify-center items-center space-y-3">
           <div className="w-20 h-20 rounded-full bg-slate-400" />
           <label
@@ -22,13 +71,38 @@ export default function EditProfile() {
           </label>
         </div>
         <div className="space-y-1">
-          <Input label="Email address" name="email" kind="email" required />
+          <Input
+            register={register('name')}
+            label="Name"
+            name="name"
+            kind="text"
+            type="text"
+          />
         </div>
         <div className="space-y-1">
-          <Input label="Phone number" name="phone" kind="phone" required />
+          <Input
+            register={register('email')}
+            label="Email address"
+            name="email"
+            kind="email"
+            type="email"
+          />
         </div>
-
-        <Button text="수정 완료" />
+        <div className="space-y-1">
+          <Input
+            register={register('phone')}
+            label="Phone number"
+            name="phone"
+            kind="phone"
+            type="text"
+          />
+        </div>
+        {errors.formErrors && errors.formErrors !== undefined ? (
+          <span className="my-2 text-red-500 font-bold text-center block">
+            {errors.root?.message}
+          </span>
+        ) : null}
+        <Button text="수정 완료" loading={loading} />
       </form>
     </Layout>
   );
