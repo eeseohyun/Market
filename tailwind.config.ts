@@ -9,7 +9,8 @@ const config: Config = {
   theme: {
     extend: {},
   },
+
   darkMode: 'media',
-  //plugins: [require('@tailwindcss/forms')],
+  plugins: [require('@tailwindcss/forms')],
 };
 export default config;
