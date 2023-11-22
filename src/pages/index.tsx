@@ -12,7 +12,7 @@ export interface ItemWithCount extends Items {
 }
 interface ItemsResponse {
   ok: boolean;
-  items: Items[];
+  items: ItemWithCount[];
 }
 
 export default function Home() {
@@ -29,7 +29,7 @@ export default function Home() {
             title={item.name}
             price={item.price}
             comments={1}
-            hearts={item._count?.favorite || 0}
+            hearts={item._count?.favorite}
           />
         ))}
         <FloatButton href="/items/upload">
