@@ -1,4 +1,4 @@
-import '@/styles/globals.css';
+import '../styles/globals.css';
 import type { AppProps } from 'next/app';
 import { SWRProvider } from '@/app/SWRProvider';
 import useUser from '../../libs/client/useUser';
