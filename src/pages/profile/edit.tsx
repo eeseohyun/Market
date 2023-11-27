@@ -3,13 +3,14 @@ import Button from '../../../components/button';
 import Input from '../../../components/input';
 import Layout from '../../../components/layout';
 import useUser from '../../../libs/client/useUser';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import useMutation from '../../../libs/client/useMutation';
 
 interface EditProfileProps {
   email?: string;
   phone?: string;
   name?: string;
+  avatar?: FileList;
   formErrors?: string;
 }
 
@@ -27,14 +28,16 @@ export default function EditProfile() {
     handleSubmit,
     setValue,
     setError,
+    watch,
     formState: { errors },
   } = useForm();
+  const [avatarPreview, setAvatarPreview] = useState('');
   useEffect(() => {
     if (user?.email) setValue('email', user.email);
     if (user?.phone) setValue('phone', user.phone);
     if (user?.name) setValue('name', user.name);
   }, [user, setValue]);
-  const onValid = ({ email, phone, name }: EditProfileProps) => {
+  const onValid = ({ email, phone, name, avatar }: EditProfileProps) => {
     if (loading) return;
     if (email === '' && phone === '' && name === '') {
       setError('formErrors', {
@@ -52,17 +55,32 @@ export default function EditProfile() {
       setError('formErrors', { message: data.error });
     }
   }, [data, setError]);
+  const avatar = watch('avatar');
+  useEffect(() => {
+    if (avatar && avatar.length > 0) {
+      const file = avatar[0];
+      setAvatarPreview(URL.createObjectURL(file));
+    }
+  }, [avatar]);
   return (
     <Layout title="프로필 수정" canGoBack>
       <form onSubmit={handleSubmit(onValid)} className="py-16 px-4 space-y-4">
         <div className="flex flex-col justify-center items-center space-y-3">
-          <div className="w-20 h-20 rounded-full bg-slate-400" />
+          {avatarPreview ? (
+            <img
+              src={avatarPreview}
+              className="w-20 h-20 rounded-full bg-slate-400"
+            />
+          ) : (
+            <div className="w-20 h-20 rounded-full bg-slate-400" />
+          )}
           <label
             htmlFor="picture"
             className="text-sm font-medium text-gray-700 cursor-pointer px-3 py-2 border border-gray-200 rounded-md shadow-md focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
           >
             프로필 변경
             <input
+              {...register('avatar')}
               id="picture"
               type="file"
               className="hidden"
