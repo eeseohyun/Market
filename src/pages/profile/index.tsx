@@ -18,7 +18,15 @@ export default function Profile() {
     <Layout title="마이페이지" hasTabBar>
       <div className="py-16 px-4">
         <div className="flex items-center space-x-3">
-          <div className="w-16 h-16 bg-slate-500 rounded-full" />
+          {user?.avatar ? (
+            <img
+              src={`https://imagedelivery.net/SBlo4UQjj-e8L8lXozu18g/${user?.avatar}/public`}
+              className="w-16 h-16 bg-gray-300 rounded-full"
+            />
+          ) : (
+            <div className="w-16 h-16 bg-gray-300 rounded-full" />
+          )}
+
           <div className="flex flex-col">
             {isLoading ? (
               <div className="h-4 w-20 bg-gray-300 rounded"></div>
@@ -98,7 +106,7 @@ export default function Profile() {
             </span>
           </Link>
         </div>
-        {data?.reviews.map((review) => (
+        {data?.reviews?.map((review) => (
           <div key={review.id} className="mt-12">
             <div className="flex items-center space-x-5">
               <div className="w-12 h-12 rounded-full bg-slate-500" />
