@@ -38,7 +38,7 @@ export default function EditProfile() {
     if (user?.name) setValue('name', user.name);
     if (user?.avatar)
       setAvatarPreview(
-        `https://imagedelivery.net/SBlo4UQjj-e8L8lXozu18g/${user?.avatar}/public`
+        `https://imagedelivery.net/SBlo4UQjj-e8L8lXozu18g/${user?.avatar}/avatar`
       );
   }, [user, setValue]);
   const onValid = async ({ email, phone, name, avatar }: EditProfileProps) => {
