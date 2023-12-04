@@ -36,19 +36,43 @@ export default function EditProfile() {
     if (user?.email) setValue('email', user.email);
     if (user?.phone) setValue('phone', user.phone);
     if (user?.name) setValue('name', user.name);
+    if (user?.avatar)
+      setAvatarPreview(
+        `https://imagedelivery.net/SBlo4UQjj-e8L8lXozu18g/${user?.avatar}/public`
+      );
   }, [user, setValue]);
-  const onValid = ({ email, phone, name, avatar }: EditProfileProps) => {
+  const onValid = async ({ email, phone, name, avatar }: EditProfileProps) => {
     if (loading) return;
     if (email === '' && phone === '' && name === '') {
       setError('formErrors', {
         message: '이메일 또는 휴대폰 번호를 입력해주세요.',
       });
     }
-    editProfile({
-      email,
-      phone,
-      name,
-    });
+    if (avatar && avatar.length > 0 && user) {
+      const { uploadURL } = await (await fetch(`/api/files`)).json();
+      const form = new FormData();
+      form.append('file', avatar[0], user?.id + '');
+      const {
+        result: { id },
+      } = await (
+        await fetch(uploadURL, {
+          method: 'POST',
+          body: form,
+        })
+      ).json();
+      editProfile({
+        email,
+        phone,
+        name,
+        avatarId: id,
+      });
+    } else {
+      editProfile({
+        email,
+        phone,
+        name,
+      });
+    }
   };
   useEffect(() => {
     if (data && !data.ok && data.error) {
@@ -67,10 +91,7 @@ export default function EditProfile() {
       <form onSubmit={handleSubmit(onValid)} className="py-16 px-4 space-y-4">
         <div className="flex flex-col justify-center items-center space-y-3">
           {avatarPreview ? (
-            <img
-              src={avatarPreview}
-              className="w-20 h-20 rounded-full bg-slate-400"
-            />
+            <img src={avatarPreview} className="w-20 h-20 rounded-full" />
           ) : (
             <div className="w-20 h-20 rounded-full bg-slate-400" />
           )}
