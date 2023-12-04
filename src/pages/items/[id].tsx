@@ -38,9 +38,15 @@ export default function ItemDetail() {
     <Layout title="상품 상세" canGoBack>
       <div className="px-4 py-16">
         <div>
-          <div className="h-96 bg-slate-300" />
+          <img
+            src={`https://imagedelivery.net/SBlo4UQjj-e8L8lXozu18g/${data?.item.image}/public`}
+            className="h-96"
+          />
           <div className="flex py-3 border-t border-b items-center space-x-3">
-            <div className="w-12 h-12 rounded-full bg-slate-300" />
+            <img
+              src={`https://imagedelivery.net/SBlo4UQjj-e8L8lXozu18g/${data?.item.user.avatar}/avatar`}
+              className="w-12 h-12 rounded-full"
+            />
             <div>
               <p className="text-sm font-medium text-gray-700">
                 {data?.item?.user?.name}
